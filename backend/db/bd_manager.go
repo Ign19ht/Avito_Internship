@@ -14,7 +14,6 @@ func CreateConnection() (*sqlx.DB, error) {
 	dbName := os.Getenv("POSTGRES_DB")
 	host := os.Getenv("POSTGRES_HOST")
 	source := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable host=%s port=%d", user, password, dbName, host, 5432)
-	fmt.Println(source)
 	conn, err := sqlx.Connect("postgres", source)
 	return conn, err
 }
