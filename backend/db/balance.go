@@ -21,9 +21,24 @@ func AccrualMoney(db *sqlx.DB, id int, amount float32) error {
 	return err
 }
 
+func CreateAccount(db *sqlx.DB, id int, amount float32) error {
+	tx := db.MustBegin()
+	tx.MustExec("insert into balances (id, balance) values ($1, $2)", id, amount)
+	err := tx.Commit()
+	return err
+}
+
 func SendMoney(db *sqlx.DB, idFrom int, idTo int, amount float32) error {
 	tx := db.MustBegin()
 	tx.MustExec("update balances set balance=balance + $1 where id=$2", amount, idTo)
+	tx.MustExec("update balances set balance=balance - $1 where id=$2", amount, idFrom)
+	err := tx.Commit()
+	return err
+}
+
+func SendMoneyWithCreating(db *sqlx.DB, idFrom int, idTo int, amount float32) error {
+	tx := db.MustBegin()
+	tx.MustExec("insert into balances (id, balance) values ($1, $2)", idTo, amount)
 	tx.MustExec("update balances set balance=balance - $1 where id=$2", amount, idFrom)
 	err := tx.Commit()
 	return err

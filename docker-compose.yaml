@@ -17,7 +17,12 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
+    environment:
+      POSTGRES_DB: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_HOST: "db"
     ports:
-      - 8000:8000
+      - 8080:8080
     depends_on:
       - db

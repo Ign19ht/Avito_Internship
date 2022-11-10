@@ -18,5 +18,5 @@ func main() {
 	router.GET("/report", handlers.GetReport)
 	router.GET("/history", handlers.GetHistory)
 
-	router.Run("localhost:8080")
+	router.Run("0.0.0.0:8080")
 }

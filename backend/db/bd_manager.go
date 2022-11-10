@@ -1,19 +1,28 @@
 package db
 
 import (
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"log"
+	"os"
 )
 
 func CreateConnection() (*sqlx.DB, error) {
-	//databaseUrl := "postgres://postgres:qwerlodaza@localhost:5432/postgres"
-	conn, err := sqlx.Connect("postgres", "user=postgres password=qwerlodaza dbname=postgres sslmode=disable")
+	user := os.Getenv("POSTGRES_USER")
+	password := os.Getenv("POSTGRES_PASSWORD")
+	dbName := os.Getenv("POSTGRES_DB")
+	host := os.Getenv("POSTGRES_HOST")
+	source := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable host=%s port=%d", user, password, dbName, host, 5432)
+	fmt.Println(source)
+	conn, err := sqlx.Connect("postgres", source)
 	return conn, err
 }
 
 func CreateTables() {
 	db, err := CreateConnection()
 	if err != nil {
+		log.Fatal(err.Error())
 		return
 	}
 	defer db.Close()
