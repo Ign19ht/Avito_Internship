@@ -30,7 +30,7 @@ func Reservation(idUser int, idService int, idOrder int, amount float32, date st
 			return http.StatusInternalServerError, schemas.ErrorResponse{Message: "DataBase error"}
 		}
 	} else {
-		return http.StatusBadRequest, schemas.ErrorResponse{Message: "Not enough money"}
+		return http.StatusBadRequest, schemas.ErrorResponse{Message: "Insufficient funds"}
 	}
 }
 
@@ -58,14 +58,14 @@ func ReservationConfirm(idUser int, idService int, idOrder int, amount float32, 
 			"CONFIRMED", date)
 		if err == nil {
 			repository.AddToHistory(conn, idUser, date, -amount, message)
-			return http.StatusOK, schemas.ErrorResponse{Message: "Reservation confirmed"}
+			return http.StatusOK, schemas.ErrorResponse{Message: "Reserve confirmed"}
 		} else {
 			return http.StatusInternalServerError, schemas.ErrorResponse{Message: "DataBase error"}
 		}
 	} else if status == "CONFIRMED" {
-		return http.StatusOK, schemas.ErrorResponse{Message: "Reservation is already confirmed"}
+		return http.StatusOK, schemas.ErrorResponse{Message: "Reserve is already confirmed"}
 	} else {
-		return http.StatusBadRequest, schemas.ErrorResponse{Message: "Reservation is already canceled"}
+		return http.StatusBadRequest, schemas.ErrorResponse{Message: "Reserve is already canceled"}
 	}
 }
 
@@ -94,7 +94,9 @@ func ReservationCancel(idUser int, idService int, idOrder int, date string) (int
 		} else {
 			return http.StatusOK, schemas.ErrorResponse{Message: "Reserve canceled"}
 		}
+	} else if status == "CANCELED" {
+		return http.StatusOK, schemas.ErrorResponse{Message: "Reserve is already canceled"}
 	} else {
-		return http.StatusBadRequest, schemas.ErrorResponse{Message: "Reserve is already confirmed or canceled"}
+		return http.StatusBadRequest, schemas.ErrorResponse{Message: "Reserve is already confirmed"}
 	}
 }

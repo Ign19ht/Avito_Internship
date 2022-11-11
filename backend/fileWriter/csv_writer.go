@@ -21,8 +21,8 @@ func WriteCSV(date string, report map[int]float32) (string, error) {
 		return "", err
 	}
 
-	link := fmt.Sprintf("%s/%s.csv", reportDir, date)
-	f, err := os.Create(link)
+	path := fmt.Sprintf("%s/%s.csv", reportDir, date)
+	f, err := os.Create(path)
 	defer f.Close()
 
 	if err != nil {
@@ -36,5 +36,5 @@ func WriteCSV(date string, report map[int]float32) (string, error) {
 		return "", err
 	}
 
-	return link, nil
+	return path, nil
 }

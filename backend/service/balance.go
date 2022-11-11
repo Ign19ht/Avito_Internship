@@ -58,7 +58,7 @@ func SendMoney(idFrom int, idTo int, amount float32, date string, message string
 		return http.StatusNotFound, schemas.ErrorResponse{Message: "Item not found"}
 	}
 	if balance < amount {
-		return http.StatusBadRequest, schemas.ErrorResponse{Message: "Not enough money"}
+		return http.StatusBadRequest, schemas.ErrorResponse{Message: "Insufficient funds"}
 	}
 
 	if _, err := repository.GetBalance(conn, idTo); err == nil {
