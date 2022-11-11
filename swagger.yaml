@@ -1,0 +1,472 @@
+swagger: "2.0"
+info:
+  title: Микросервис для работы с балансом пользователей
+  version: v1
+schemes: 
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+tags:
+  - name: Баланс
+    description: Все операции с балансом
+  - name: Резервирование
+    description: Операции для работы с резервированием
+  - name: Отчеты
+    description: Предоставляемые отчеты
+paths:
+  /balance/balance:
+    get:
+      tags:
+        - Баланс
+      summary: Запрос баланса пользователя
+      description: Возвращает данные о балансе по id
+      parameters:
+        - in: body
+          name: body
+          description: Данные о пользователе
+          schema:
+            $ref: '#/definitions/BalanceRequest' 
+      responses:
+        200:
+          description: Успех.
+          schema:
+            $ref: '#/definitions/BalanceResponse'
+        400:
+          description: Данные введены неверно.
+          schema:
+            $ref: '#/definitions/BadRequest'
+        404:
+          description: Пользователя с данным id не существует.
+          schema:
+            $ref: '#/definitions/ItemNotFound'
+        500:
+          description: Ошибка базы данных или сервера.
+          schema:
+            $ref: '#/definitions/InternalServerError'
+  /balance/accrual:
+    post:
+      tags:
+        - Баланс
+      summary: Пополнение счета
+      description: Пополняет счет по id и записывает транзакцию в историю транзакций пользователя
+      parameters:
+        - in: body
+          name: body
+          description: Данные о пополнении
+          schema:
+            $ref: '#/definitions/AccrualRequest' 
+      responses:
+        200:
+          description: Успех.
+          schema:
+            $ref: '#/definitions/StatusOk'
+        400:
+          description: Данные введены неверно.
+          schema:
+            $ref: '#/definitions/BadRequest'
+        500:
+          description: Ошибка базы данных или сервера.
+          schema:
+            $ref: '#/definitions/InternalServerError'
+  /balance/send:
+    post:
+      tags:
+        - Баланс
+      summary: Перевод средств
+      description: Переводит деньги с одного счета на другой, если на первом достаточно средств для проведения операции. Записывает транзакцию в историю транзакций обоих участников операции.
+      parameters:
+        - in: body
+          name: body
+          description: Данные о транзакции
+          schema:
+            $ref: '#/definitions/SendRequest' 
+      responses:
+        200:
+          description: Успехю
+          schema:
+            $ref: '#/definitions/StatusOk'
+        400:
+          description: Данные введены неверно.
+          schema:
+            $ref: '#/definitions/BadRequest'
+        404:
+          description: Отправителя с данным id не существует или недостаточно средств.
+          schema:
+            $ref: '#/definitions/ItemNotFound'
+        500:
+          description: Ошибка базы данных или сервера.
+          schema:
+            $ref: '#/definitions/InternalServerError'
+  /order/reserve:
+    post:
+      tags:
+        - Резервирование
+      summary: Резервирование средств клиента
+      description: Проверяет наличие средств на счету. Переводит деньги со счета клиента на выделенный счет, с пометкой RESERVED. На истории транзакций не отображается.
+      parameters:
+        - in: body
+          name: body
+          description: Данные о транзакции
+          schema:
+            $ref: '#/definitions/ReservationRequest' 
+      responses:
+        200:
+          description: Успех.
+          schema:
+            $ref: '#/definitions/StatusOk'
+        400:
+          description: Данные введены неверно.
+          schema:
+            $ref: '#/definitions/BadRequest'
+        404:
+          description: Отправителя с данным id не существует или недостаточно средств.
+          schema:
+            $ref: '#/definitions/ItemNotFound'
+        500:
+          description: Ошибка базы данных или сервера.
+          schema:
+            $ref: '#/definitions/InternalServerError'
+  /order/confirm:
+    post:
+      tags:
+        - Резервирование
+      summary: Признание выручки
+      description: Средства на выделенном счету помечаются как CONFIRMED. Вносит данные в историю транзакций пользователя.
+      parameters:
+        - in: body
+          name: body
+          description: Данные о транзакции
+          schema:
+            $ref: '#/definitions/ConfirmRequest' 
+      responses:
+        200:
+          description: Успех.
+          schema:
+            $ref: '#/definitions/StatusOk'
+        400:
+          description: Данные введены неверно или резерв уже отменен.
+          schema:
+            $ref: '#/definitions/BadRequest'
+        404:
+          description: Данного резерва не существует
+          schema:
+            $ref: '#/definitions/ItemNotFound'
+        500:
+          description: Ошибка базы данных или сервера.
+          schema:
+            $ref: '#/definitions/InternalServerError'
+  /order/cancel:
+    post:
+      tags:
+        - Резервирование
+      summary: Отмена резерва
+      description: Средства на выделенном счету помечаются как CANCELED. Отправляет деньги обратно на счет пользователя. НЕ вносит данные в историю транзакций пользователя.
+      parameters:
+        - in: body
+          name: body
+          description: Данные о транзакции
+          schema:
+            $ref: '#/definitions/CancelRequest' 
+      responses:
+        200:
+          description: Успех.
+          schema:
+            $ref: '#/definitions/StatusOk'
+        400:
+          description: Данные введены неверно или резерв уже подтвержден.
+          schema:
+            $ref: '#/definitions/BadRequest'
+        404:
+          description: Данного резерва не существует
+          schema:
+            $ref: '#/definitions/ItemNotFound'
+        500:
+          description: Ошибка базы данных или сервера.
+          schema:
+            $ref: '#/definitions/InternalServerError'
+  /report:
+    get:
+      tags:
+        - Отчеты
+      summary: Отчет для бугалтерии
+      description: Компилирует отчет для бугалтерии и возвращает путь к файлу отчета
+      parameters:
+        - in: body
+          name: body
+          description: Данные о транзакции
+          schema:
+            $ref: '#/definitions/ReportRequest' 
+      responses:
+        200:
+          description: Успех.
+          schema:
+            $ref: '#/definitions/ReportResponse'
+        400:
+          description: Данные введены неверно.
+          schema:
+            $ref: '#/definitions/BadRequest'
+        404:
+          description: Нет операций за данный период
+          schema:
+            $ref: '#/definitions/ItemNotFound'
+        500:
+          description: Ошибка базы данных или сервера.
+          schema:
+            $ref: '#/definitions/InternalServerError'
+  /history:
+    get:
+      tags:
+        - Отчеты
+      summary: История транзакций пользователя
+      description: Возвращает историю с учетом пагинации и сортировке по дате и сумме
+      parameters:
+        - in: body
+          name: body
+          description: Данные о транзакции
+          schema:
+            $ref: '#/definitions/HistoryRequest' 
+      responses:
+        200:
+          description: Успех.
+          schema:
+            $ref: '#/definitions/HistoryResponse'
+        400:
+          description: Данные введены неверно.
+          schema:
+            $ref: '#/definitions/BadRequest'
+        404:
+          description: История пользоватея пустая
+          schema:
+            $ref: '#/definitions/ItemNotFound'
+        500:
+          description: Ошибка базы данных или сервера.
+          schema:
+            $ref: '#/definitions/InternalServerError'
+definitions:
+  AccrualRequest:
+    type: object
+    required:
+      - id
+      - amount
+      - date
+      - message
+    properties:
+      id:
+        type: integer
+        example: 10
+      amount:
+        type: number
+        format: float
+        example: 50
+      date:
+        type: string
+        example: '2008-11-15T18:36:45Z'
+      message:
+        type: string
+        example: 'For you'
+  BalanceRequest:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: integer
+        example: 10
+  SendRequest:
+    required:
+      - idFrom
+      - idTo
+      - amount
+      - date
+      - message
+    type: object
+    properties:
+      idFrom:
+        type: integer
+        example: 10
+      idTo:
+        type: integer
+        example: 12
+      amount:
+        type: number
+        format: float
+        example: 50.5
+      date:
+        type: string
+        example: '2008-11-15T18:36:45Z'
+      message:
+        type: string
+        example: 'For you'
+  BalanceResponse:
+    type: object
+    properties:
+      balance:
+        type: number
+        format: float
+        example: 15.5
+  ReportRequest:
+    required:
+      - month
+      - year
+    type: object
+    properties:
+      month:
+        type: integer
+        example: 10
+      year:
+        type: integer
+        example: 2008
+  ReportResponse:
+    type: object
+    properties:
+      link:
+        type: string
+        example: 'reports/2008-10.csv'
+  HistoryRequest:
+    required:
+      - id
+      - sortType
+      - amount
+      - orderType
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+        example: 10
+      sortType:
+        type: string
+        enum:
+          - "amount"
+          - "date"
+      amount:
+        type: integer
+        example: 50
+      orderType:
+        type: string
+        enum:
+          - "asc"
+          - "desc"
+      offset:
+        type: integer
+        example: 18
+  HistoryResponse:
+    type: object
+    properties:
+      history:
+        type: array
+        items:
+            $ref: '#/definitions/HistoryResponseItem'
+  HistoryResponseItem:
+    type: object
+    properties:
+      date:
+        type: string
+        example: "2008-11-15T18:36:45Z"
+      amount:
+        type: number
+        format: float
+        example: 58.75
+      message:
+        type: string
+        example: "For you"
+  ReservationRequest:
+    required:
+      - idUser
+      - idService
+      - idOrder
+      - amount
+      - date
+    type: object
+    properties:
+      idUser:
+        type: integer
+        example: 24
+      idService:
+        type: integer
+        example: 13
+      idOrder:
+        type: integer
+        example: 2
+      amount:
+        type: number
+        format: float
+        example: 54.15
+      date:
+        type: string
+        example: "2008-11-15T18:36:45Z"
+  ConfirmRequest:
+    required:
+      - idUser
+      - idService
+      - idOrder
+      - amount
+      - date
+      - message
+    type: object
+    properties:
+      idUser:
+        type: integer
+        example: 24
+      idService:
+        type: integer
+        example: 13
+      idOrder:
+        type: integer
+        example: 2
+      amount:
+        type: number
+        format: float
+        example: 54.15
+      date:
+        type: string
+        example: "2008-11-15T18:36:45Z"
+      message:
+        type: string
+        example: "For you"
+  CancelRequest:
+    required:
+      - idUser
+      - idService
+      - idOrder
+      - date
+    type: object
+    properties:
+      idUser:
+        type: integer
+        example: 24
+      idService:
+        type: integer
+        example: 13
+      idOrder:
+        type: integer
+        example: 2
+      date:
+        type: string
+        example: "2008-11-15T18:36:45Z"
+  StatusOk:
+    type: object
+    properties:
+      message:
+        type: string
+        example: "OK"
+  BadRequest:
+    type: object
+    properties:
+      message:
+        type: string
+        example: "Validation Failed"
+  ItemNotFound:
+    type: object
+    properties:
+      message:
+        type: string
+        example: "Item not found"
+  InternalServerError:
+    type: object
+    properties:
+      message:
+        type: string
+        example: "DataBase error"

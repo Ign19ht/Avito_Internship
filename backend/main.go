@@ -9,12 +9,12 @@ import (
 func main() {
 	repository.CreateTables()
 	router := gin.Default()
-	router.POST("/accrual", handlers.MoneyAccrual)
-	router.POST("/reserve", handlers.Reservation)
-	router.POST("/cancel", handlers.ReservationCancel)
-	router.POST("/confirm", handlers.ReservationConfirm)
-	router.POST("/send", handlers.SendMoney)
-	router.GET("/balance", handlers.GetBalance)
+	router.POST("/balance/accrual", handlers.MoneyAccrual)
+	router.POST("/balance/send", handlers.SendMoney)
+	router.GET("/balance/balance", handlers.GetBalance)
+	router.POST("/order/reserve", handlers.Reservation)
+	router.POST("/order/cancel", handlers.ReservationCancel)
+	router.POST("/order/confirm", handlers.ReservationConfirm)
 	router.GET("/report", handlers.GetReport)
 	router.GET("/history", handlers.GetHistory)
 
