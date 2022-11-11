@@ -67,20 +67,118 @@
 ### Примеры
 
 Запрос баланса 
+```json
+{
+  "id": 1
+}
+```
 ![img.png](examples/img_1.png)
 Пополнение средств
+```json
+{
+  "id":1,
+  "date":"2008-12-15T18:36:45Z",
+  "message":"It's for you",
+  "amount":20
+}
+```
 ![img.png](examples/img.png)
 Резервирование
+```json
+{
+  "idUser":15,
+  "date":"2008-12-18T18:36:45Z",
+  "idService":4,
+  "idOrder":5,
+  "amount": 5
+}
+```
 ![img_2.png](examples/img_2.png)
 Резервирование при нехватке средств
 ![img.png](examples/img_6.png)
 Подтверждение
+```json
+{
+  "idUser":15,
+  "date":"2008-12-19T18:36:45Z",
+  "idService":4,
+  "idOrder":5,
+  "amount": 5,
+  "message": "confirmed by me"
+}
+```
 ![img_3.png](examples/img_8.png)
 Попытка подтверждения при отсутсвии данного резерва
 ![img_1.png](examples/img_7.png)
 История: отсортировано по сумме в порядке убывания, первые 3 элемента
+```json
+{
+  "id":1,
+  "sortType":"amount",
+  "orderType": "desc",
+  "amount":3,
+  "offset":0
+}
+```
+```
+{
+    "history": [
+        {
+            "date": "2008-10-14T18:36:45Z",
+            "amount": 50,
+            "message": "for you"
+        },
+        {
+            "date": "2008-11-14T18:36:45Z",
+            "amount": 30,
+            "message": "Surprise"
+        },
+        {
+            "date": "2008-11-15T18:36:45Z",
+            "amount": 20,
+            "message": "Hello"
+        }
+    ]
+}
+```
 ![img_3.png](examples/img_3.png)
 История: отсортировано по сумме в порядке убывания, первые 3 элемента, пропуская первый
+```json
+{
+  "id":1,
+  "sortType":"amount",
+  "orderType": "desc",
+  "amount":3,
+  "offset":1
+}
+```
+```
+{
+    "history": [
+        {
+            "date": "2008-11-14T18:36:45Z",
+            "amount": 30,
+            "message": "Surprise"
+        },
+        {
+            "date": "2008-11-15T18:36:45Z",
+            "amount": 20,
+            "message": "Hello"
+        },
+        {
+            "date": "2008-12-15T18:36:45Z",
+            "amount": 20,
+            "message": "It's for you"
+        }
+    ]
+}
+```
 ![img_4.png](examples/img_4.png)
 Получение ссылки на отчет
+```json
+{
+  "month":10,
+  "year":2008
+}
+```
 ![img_5.png](examples/img_5.png)
