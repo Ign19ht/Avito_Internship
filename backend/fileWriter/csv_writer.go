@@ -15,8 +15,13 @@ func WriteCSV(date string, report map[int]float32) (string, error) {
 		data = append(data, []string{strconv.Itoa(key), fmt.Sprintf("%.2f", value)})
 	}
 
-	link := fmt.Sprintf("%s/%s.csv", "reports", date)
+	reportDir := os.Getenv("REPORT_DIRECTORY")
+	err := os.MkdirAll(reportDir, os.ModePerm)
+	if err != nil {
+		return "", err
+	}
 
+	link := fmt.Sprintf("%s/%s.csv", reportDir, date)
 	f, err := os.Create(link)
 	defer f.Close()
 

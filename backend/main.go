@@ -1,13 +1,13 @@
 package main
 
 import (
-	"Avito/backend/db"
 	"Avito/backend/handlers"
+	"Avito/backend/repository"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	db.CreateTables()
+	repository.CreateTables()
 	router := gin.Default()
 	router.POST("/accrual", handlers.MoneyAccrual)
 	router.POST("/reserve", handlers.Reservation)

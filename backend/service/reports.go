@@ -1,8 +1,8 @@
 package service
 
 import (
-	"Avito/backend/db"
 	"Avito/backend/fileWriter"
+	"Avito/backend/repository"
 	"Avito/backend/schemas"
 	"fmt"
 	"net/http"
@@ -14,17 +14,17 @@ func GetReport(month int, year int) (int, interface{}) {
 	yearStr := strconv.Itoa(year)
 	date := fmt.Sprintf("%d-%d", year, month)
 
-	conn, err := db.CreateConnection()
+	conn, err := repository.CreateConnection()
 	if err != nil {
 		return http.StatusInternalServerError, schemas.ErrorResponse{Message: "DataBase error"}
 	}
 	defer conn.Close()
 
-	if link, err := db.GetReport(conn, date); err == nil {
+	if link, err := repository.GetReport(conn, date); err == nil {
 		return http.StatusOK, schemas.ReportResponse{Link: link}
 	}
 
-	data, err := db.GetMonthlyReport(conn, monthStr, yearStr)
+	data, err := repository.GetMonthlyReport(conn, monthStr, yearStr)
 	if err != nil {
 		return http.StatusInternalServerError, schemas.ErrorResponse{Message: "DataBase error"}
 	}
@@ -42,7 +42,7 @@ func GetReport(month int, year int) (int, interface{}) {
 	}
 
 	if link, err := fileWriter.WriteCSV(date, report); err == nil {
-		db.AddReport(conn, date, link)
+		repository.AddReport(conn, date, link)
 		return http.StatusOK, schemas.ReportResponse{Link: link}
 	} else {
 		return http.StatusInternalServerError, schemas.ErrorResponse{Message: "Write file error"}
@@ -51,13 +51,13 @@ func GetReport(month int, year int) (int, interface{}) {
 }
 
 func GetHistory(id int, sortType string, orderType string, amount int, offset int) (int, interface{}) {
-	conn, err := db.CreateConnection()
+	conn, err := repository.CreateConnection()
 	if err != nil {
 		return http.StatusInternalServerError, schemas.ErrorResponse{Message: "DataBase error"}
 	}
 	defer conn.Close()
 
-	history, err := db.GetHistory(conn, id, sortType, orderType, amount, offset)
+	history, err := repository.GetHistory(conn, id, sortType, orderType, amount, offset)
 	if err != nil {
 		return http.StatusInternalServerError, schemas.ErrorResponse{Message: "DataBase error"}
 	}
